@@ -1,0 +1,98 @@
+# File Paths
+data:
+  raw: 'data/raw/sentiment_analysis.csv'
+  processed: 'data/processed/sentiment_analysis_cleaned.csv'
+  ml_split: 'data/processed/ml_split/'
+  tf_split: 'data/processed/tf_split/'
+  tf_train_dataset: 'data/processed/tf_train_dataset/'
+  tf_test_dataset: 'data/processed/tf_test_dataset/'
+
+models:
+  model_path: 'models/'
+  model_tf_path: 'bert-base-uncased'
+
+logs:
+  evaluate: 'logs/'
+  train_transformer: 'logs/'
+
+# Text Preprocessing Settings
+preprocessing:
+  stopwords_language: 'english'
+  # Define common emoticons mapping
+  emoticons:
+      ":\\)": " smile "
+      ":-\\)": " smile "
+      ":\\(": " sad "
+      ":-\\(": " sad "
+      ";\\)": " wink "
+      ";-\\)": " wink "
+      ":D": " laugh "
+      ":-D": " laugh "
+      ":'\\(": " cry "
+      ":-\\/": " skeptical "
+
+# Training Parameters
+training:
+  test_size: 0.2
+  random_state: 42
+
+  # TF-IDF
+  tfidf:
+    ngram_range: [1, 3]  # Use unigrams, bigrams, trigrams
+    max_features: 10000
+  tokenizer:
+    truncation: True
+    padding: True
+    return_tensors: 'tf'
+
+  # Hyperparameter Grids for GridSearchCV
+  hyper_param:
+    cv: 3
+    scoring: 'accuracy'
+
+  # training ML models
+  models:
+    Naive_Bayes:
+      class: "sklearn.naive_bayes.MultinomialNB"
+    SVM:
+      class: "sklearn.svm.SVC"
+    Random_Forest:
+      class: "sklearn.ensemble.RandomForestClassifier"
+    XGBoost:
+      class: "xgboost.XGBClassifier"
+
+  param_grids:
+    SVM:
+      C: [0.1, 1, 10]
+      kernel: ['linear', 'rbf']
+
+    Random_Forest:
+      n_estimators: [100, 200, 300]
+      max_depth: [10, 20, 30]
+
+    XGBoost:
+      n_estimators: [100, 200]
+      learning_rate: [0.05, 0.1]
+      max_depth: [4, 6]
+
+    LightGBM:
+      n_estimators: [100, 200]
+      learning_rate: [0.05, 0.1]
+      max_depth: [4, 6]
+
+  # Transformer Models
+  transformers:
+    model: "bert-base-uncased"
+    num_labels: 3
+    max_length: 128
+    batch_size: 8
+    epochs: 3
+    learning_rate: 2e-5
+    dropout_rate: 0.1
+    optimizer: "adamw"  # Options: ["adam", "adamw", "sgd"]
+
+
+# Deployment Settings
+deployment:
+  host: '0.0.0.0'
+  port: 8000
