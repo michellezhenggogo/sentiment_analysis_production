@@ -13,6 +13,7 @@ models:
 
 logs:
   evaluate: 'logs/'
+  train_ml: 'logs/'
   train_transformer: 'logs/'
 
 # Text Preprocessing Settings
@@ -33,7 +34,7 @@ preprocessing:
 
 # Training Parameters
 training:
-  test_size: 0.2
+  test_size: 0.15  # same as val_size
   random_state: 42
 
   # TF-IDF
@@ -47,7 +48,7 @@ training:
 
   # Hyperparameter Grids for GridSearchCV
   hyper_param:
-    cv: 3
+    cv: 5
     scoring: 'accuracy'
 
   # training ML models
@@ -60,6 +61,8 @@ training:
       class: "sklearn.ensemble.RandomForestClassifier"
     XGBoost:
       class: "xgboost.XGBClassifier"
+    LightGBM:
+      class: "lightgbm.LGBMClassifier"
 
   param_grids:
     SVM:
@@ -69,16 +72,22 @@ training:
     Random_Forest:
       n_estimators: [100, 200, 300]
       max_depth: [10, 20, 30]
+      min_samples_split: [5, 10]
+      min_samples_leaf: [2, 5]
 
     XGBoost:
       n_estimators: [100, 200]
       learning_rate: [0.05, 0.1]
       max_depth: [4, 6]
+      reg_alpha: [0, 1]
+      reg_lambda: [1, 5]
 
     LightGBM:
       n_estimators: [100, 200]
       learning_rate: [0.05, 0.1]
       max_depth: [4, 6]
+      reg_alpha: [0, 1]
+      reg_lambda: [1, 5]
 
   # Transformer Models
   transformers:

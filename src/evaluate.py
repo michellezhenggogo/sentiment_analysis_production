@@ -1,7 +1,5 @@
 import os
 import joblib
-import pandas as pd
-import numpy as np
 import tensorflow as tf
 from transformers import BertTokenizer, TFBertForSequenceClassification
 from sklearn.metrics import classification_report, accuracy_score
@@ -34,14 +32,13 @@ class Evaluator:
         self.model_tf_path = CONFIG['models']['model_tf_path']
         self.path_tf_test = CONFIG['data']['tf_test_dataset']
 
-        self.model_name = CONFIG['training']['transformers']['BERT']
+        self.model_name = CONFIG['training']['transformers']['model']
         self.tokenizer = BertTokenizer.from_pretrained(self.model_name)
-        self.max_length = CONFIG['training']['tras_param']['max_length']
+        self.max_length = CONFIG['training']['transformers']['max_length']
         self.truncation = CONFIG['training']['tokenizer']['truncation']
         self.padding = CONFIG['training']['tokenizer']['padding']
         self.return_tensors = CONFIG['training']['tokenizer']['return_tensors']
-        self.batch_size = CONFIG['training']['tras_param']['batch_size']
-
+        self.batch_size = CONFIG['training']['transformers']['batch_size']
 
     def evaluate_ml_models(self):
         """Evaluate traditional ML models."""
@@ -84,19 +81,14 @@ class Evaluator:
 
         # Load test datasets
         y_test = joblib.load(os.path.join(self.processed_tf_file, 'y_test.pkl'))
-
         test_dataset = tf.data.Dataset.load(self.path_tf_test)
-        for batch in test_dataset.take(1):  # Take 1 batch to check
-            print(batch)
 
         # Load model
         model = TFBertForSequenceClassification.from_pretrained(self.model_tf_path)
 
-        # Make predictions using test dataset
-        predictions = model.predict(test_dataset)
-
-        # Convert logits to probabilities
-        predicted_labels = tf.nn.softmax(predictions.logits, axis=1).numpy().argmax(axis=1)
+        # Predict labels
+        predicted_labels = model.predict(test_dataset).logits
+        predicted_labels = tf.argmax(tf.nn.softmax(predicted_labels, axis=1), axis=1).numpy()
 
         # Compute accuracy
         acc = accuracy_score(y_test, predicted_labels)
@@ -123,5 +115,5 @@ class Evaluator:
 
 if __name__ == "__main__":
     evaluator = Evaluator()
-    # evaluator.evaluate_ml_models()
+    evaluator.evaluate_ml_models()
     evaluator.evaluate_transformer()

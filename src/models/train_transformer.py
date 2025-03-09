@@ -46,7 +46,7 @@ class TransformerTrainer:
 
     def train_transformer(self):
         # Load TensorFlow dataset
-        train_dataset, test_dataset = self.load_tf_dataset()
+        train_dataset, val_dataset = self.load_tf_dataset()
 
         # Load model with dropout
         self.model.config.hidden_dropout_prob = self.dropout
@@ -64,7 +64,21 @@ class TransformerTrainer:
         self.model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
 
         # Train model
-        self.model.fit(train_dataset, validation_data=test_dataset, epochs=self.epochs)
+        history = self.model.fit(train_dataset, validation_data=val_dataset, epochs=self.epochs)
+
+        # Extract Training Logs
+        train_acc = history.history['accuracy'][-1]
+        train_loss = history.history['loss'][-1]
+        val_acc = history.history['val_accuracy'][-1]
+        val_loss = history.history['val_loss'][-1]
+
+        # Print Results
+        print(f"\nFinal Training Accuracy: {train_acc:.2f}, Training Loss: {train_loss:.4f}")
+        print(f"Final Validation Accuracy: {val_acc:.2f}, Validation Loss: {val_loss:.4f}")
+
+        # Log Training Results
+        logging.info(f"Final Training Accuracy: {train_acc:.2f}, Training Loss: {train_loss:.4f}")
+        logging.info(f"Final Validation Accuracy: {val_acc:.2f}, Validation Loss: {val_loss:.4f}")
 
         # Save the trained model
         self.save_model()
@@ -72,29 +86,30 @@ class TransformerTrainer:
     def load_saved_tf_data(self):
         try:
             X_train = joblib.load(os.path.join(self.split_path_tf, "X_train.pkl"))
-            X_test = joblib.load(os.path.join(self.split_path_tf, "X_test.pkl"))
+            X_val = joblib.load(os.path.join(self.split_path_tf, "X_val.pkl"))
             train_masks = joblib.load(os.path.join(self.split_path_tf, "train_masks.pkl"))
-            test_masks = joblib.load(os.path.join(self.split_path_tf, "test_masks.pkl"))
+            val_masks = joblib.load(os.path.join(self.split_path_tf, "val_masks.pkl"))
             y_train = joblib.load(os.path.join(self.split_path_tf, "y_train.pkl"))
-            y_test = joblib.load(os.path.join(self.split_path_tf, "y_test.pkl"))
+            y_val = joblib.load(os.path.join(self.split_path_tf, "y_val.pkl"))
+
             print(f"Loaded train-test data from {self.split_path_tf}")
-            return X_train, X_test, train_masks, test_masks, y_train, y_test
+            return X_train, X_val, train_masks, val_masks, y_train, y_val
 
         except FileNotFoundError:
             print("Train-test split not found.")
             return None, None, None, None, None, None
 
     def load_tf_dataset(self):
-        X_train, X_test, train_masks, test_masks, y_train, y_test = self.load_saved_tf_data()
+        X_train, X_val, train_masks, val_masks, y_train, y_val = self.load_saved_tf_data()
 
         # Convert to TensorFlow dataset
         train_dataset = tf.data.Dataset.from_tensor_slices(
             ({"input_ids": X_train, "attention_mask": train_masks}, y_train)).batch(self.batch_size)
 
-        test_dataset = tf.data.Dataset.from_tensor_slices(
-            ({"input_ids": X_test, "attention_mask": test_masks}, y_test)).batch(self.batch_size)
+        val_dataset = tf.data.Dataset.from_tensor_slices(
+            ({"input_ids": X_val, "attention_mask": val_masks}, y_val)).batch(self.batch_size)
 
-        return train_dataset, test_dataset
+        return train_dataset, val_dataset
 
     def save_model(self):
         save_path = f"models/{self.model_name.replace('/', '_')}_model"

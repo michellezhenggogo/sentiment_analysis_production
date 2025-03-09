@@ -1,9 +1,24 @@
 **Sentiment Analysis from Multiple Social Media Platforms**
 
-This project focuses on developing a sentiment analysis system from social media posts. Using state-of-the-art natural language processing techniques, the system automatically identifies and categorizes the sentiment expressed within social media content.
+**Description**: 
+This repository contains the end-to-end Sentiment Analysis Pipeline, including traditional ML models and Transformer-based models.
 
-The code compares two distinct approaches:
+- This project is designed for sentiment analysis using traditional machine learning (ML) models and Transformer-based models (BERT). 
+- The pipeline covers data preprocessing, training, evaluation, and deployment.
 
-• Traditional TF-IDF + Machine Learning Models(SVM, Random Forest, XGBoost, and LightGBM)
+**Data Source**: Kaggle dataset link below
 
-• Deep Learning using BERT
+https://www.kaggle.com/datasets/mdismielhossenabir/sentiment-analysis
+
+**Features**:
+- Preprocesses text data for sentiment analysis
+- Implements traditional ML models: Naïve Bayes, SVM, Random Forest, XGBoost
+- Implements Transformer-based model: Fine-tuned BERT
+- Hyperparameter tuning with Bayesian Optimization
+- Model evaluation and performance comparison
+- Deployment-ready pipeline
+
+**Deployment**:
+- Container
+- AWS
+
