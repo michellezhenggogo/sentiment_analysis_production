@@ -80,8 +80,9 @@ class Evaluator:
         print("\nEvaluating Transformer Model...")
 
         # Load test datasets
-        y_test = joblib.load(os.path.join(self.processed_tf_file, 'y_test.pkl'))
-        test_dataset = tf.data.Dataset.load(self.path_tf_test)
+        X_test, y_test, test_masks = self.load_transformer_test_data()
+        test_dataset = tf.data.Dataset.from_tensor_slices(
+            ({"input_ids": X_test, "attention_mask": test_masks}, y_test)).batch(self.batch_size, drop_remainder=True)  # ensure dataset does not pad extra batches.
 
         # Load model
         model = TFBertForSequenceClassification.from_pretrained(self.model_tf_path)
@@ -89,6 +90,7 @@ class Evaluator:
         # Predict labels
         predicted_labels = model.predict(test_dataset).logits
         predicted_labels = tf.argmax(tf.nn.softmax(predicted_labels, axis=1), axis=1).numpy()
+        y_test = y_test[:len(predicted_labels)]
 
         # Compute accuracy
         acc = accuracy_score(y_test, predicted_labels)
@@ -111,6 +113,18 @@ class Evaluator:
         except FileNotFoundError:
             print("ML test data not found.")
             return None, None
+
+    def load_transformer_test_data(self):
+        try:
+            X_test = joblib.load(os.path.join(self.processed_tf_file, "X_test.pkl"))
+            y_test = joblib.load(os.path.join(self.processed_tf_file, "y_test.pkl"))
+            test_masks = joblib.load(os.path.join(self.processed_tf_file, "test_masks.pkl"))
+
+            print(f"Loaded ml test data from {self.processed_ml_file}")
+            return X_test, y_test, test_masks
+        except FileNotFoundError:
+            print("ML test data not found.")
+            return None, None, None
 
 
 if __name__ == "__main__":
