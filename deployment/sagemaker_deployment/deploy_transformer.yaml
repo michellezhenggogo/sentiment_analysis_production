@@ -1,0 +1,10 @@
+version: "3"
+services:
+  bert-inference:
+    image: my-docker-repo/bert-inference
+    ports:
+      - "8080:8080"
+    environment:
+      - MODEL_PATH=/models/bert_model
+      - AWS_ACCESS_KEY_ID=your_access_key
+      - AWS_SECRET_ACCESS_KEY=your_secret_key

@@ -1,0 +1,8 @@
+# Build Docker Image
+docker build -t bert-inference .
+
+# Push Image to AWS Elastic Container Registry (ECR)
+aws ecr create-repository --repository-name bert-inference
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin your-account-id.dkr.ecr.us-east-1.amazonaws.com
+docker tag bert-inference:latest your-account-id.dkr.ecr.us-east-1.amazonaws.com/bert-inference:latest
+docker push your-account-id.dkr.ecr.us-east-1.amazonaws.com/bert-inference:latest
