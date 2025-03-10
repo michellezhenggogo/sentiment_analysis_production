@@ -1,6 +1,0 @@
-Flask
-joblib
-numpy
-tensorflow
-transformers
-scikit-learn

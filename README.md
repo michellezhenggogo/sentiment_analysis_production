@@ -20,5 +20,7 @@ https://www.kaggle.com/datasets/mdismielhossenabir/sentiment-analysis
 
 **Deployment**:
 - Container
-- AWS
+- Flask
+- AWS Lambda for ML model inference
+- AWS SageMaker for Transformer prediction
 
